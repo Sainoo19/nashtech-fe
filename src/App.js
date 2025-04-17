@@ -1,9 +1,11 @@
-// src/App.js
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminLayout from './components/layout/AdminLayout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import Product from './pages/Product';
+import Category from './pages/Category';
 import Unauthorized from './pages/Unauthorized';
 
 function App() {
@@ -15,15 +17,40 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
 
-          {/* Protected routes */}
+          {/* Protected routes with AdminLayout */}
           <Route
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <AdminLayout>
+                  <Dashboard />
+                </AdminLayout>
               </ProtectedRoute>
             }
           />
+
+          <Route
+            path="/categories"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <Category />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/products"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <Product />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Add more routes for categories and customers here */}
 
           {/* Redirect root to dashboard */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />

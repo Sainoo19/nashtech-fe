@@ -7,7 +7,7 @@ const Unauthorized = () => {
             <div className="bg-white p-8 rounded shadow-md w-full max-w-md text-center">
                 <h2 className="text-2xl font-bold mb-4 text-red-600">Access Denied</h2>
                 <p className="mb-4">
-                    You do not have permission to access the admin dashboard.
+                    You do not have permission to access the admin site.
                     This area requires administrator privileges.
                 </p>
                 <Link
