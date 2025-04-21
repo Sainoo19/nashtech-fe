@@ -7,6 +7,7 @@ const navItems = [
     { to: "/products", label: "Products", icon: Package },
     { to: "/categories", label: "Categories", icon: Menu },
     { to: "/customers", label: "Customers", icon: Users },
+    { to: "/variants", label: "Variants", icon: Package },
 ];
 
 const SideBar = ({ isSidebarHidden, setIsSidebarHidden }) => {

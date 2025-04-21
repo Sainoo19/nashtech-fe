@@ -6,6 +6,8 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Product from './pages/Product';
 import Category from './pages/Category';
+import Customer from './pages/Customer';
+import ProductVariant from './pages/ProductVariant';
 import Unauthorized from './pages/Unauthorized';
 
 function App() {
@@ -39,6 +41,29 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+            path="/variants"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <ProductVariant />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/customers"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <Customer />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="/products"
             element={
