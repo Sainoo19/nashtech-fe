@@ -135,7 +135,6 @@ const Customer = () => {
         }
     };
 
-    // Handle search with debounce
     const handleSearch = (e) => {
         const value = e.target.value;
         setSearchTerm(value);
@@ -147,11 +146,19 @@ const Customer = () => {
 
         const timeoutId = setTimeout(() => {
             setCurrentPage(1); // Reset to first page on search
-            fetchCustomers();
-        }, 500);
+        }, 500); // After 500ms, this will trigger the useEffect through currentPage change
 
         setFilterTimeout(timeoutId);
     };
+
+    // Cleanup the timeout when component unmounts
+    useEffect(() => {
+        return () => {
+            if (filterTimeout) {
+                clearTimeout(filterTimeout);
+            }
+        };
+    }, [filterTimeout]);
 
     // Handle sort change
     const handleSortChange = (e) => {
@@ -265,7 +272,7 @@ const Customer = () => {
     // Load customers on component mount and when filters or pagination changes
     useEffect(() => {
         fetchCustomers();
-    }, [currentPage, pageSize, sortBy, ascending]);
+    }, [currentPage, pageSize, sortBy, ascending, searchTerm]);
 
     return (
         <div className="container mx-auto p-4">

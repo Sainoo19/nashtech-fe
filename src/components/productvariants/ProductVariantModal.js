@@ -7,11 +7,15 @@ const ProductVariantModal = ({ isOpen, onClose, onSubmit, variant, products, rar
         rarityId: '',
         price: '',
         stockQuantity: '',
-        imageUrl: ''
+        imageUrl: '',
+        imageFile: null
     });
 
     // State for form validation errors
     const [errors, setErrors] = useState({});
+
+    // State to store image preview URL
+    const [previewUrl, setPreviewUrl] = useState('');
 
     // Set initial form data when editing an existing variant
     useEffect(() => {
@@ -21,8 +25,12 @@ const ProductVariantModal = ({ isOpen, onClose, onSubmit, variant, products, rar
                 rarityId: variant.rarityId || '',
                 price: variant.price || '',
                 stockQuantity: variant.stockQuantity || '',
-                imageUrl: variant.imageUrl || ''
+                imageUrl: variant.imageUrl || '',
+                imageFile: null
             });
+
+            // Set preview URL from existing imageUrl
+            setPreviewUrl(variant.imageUrl || '');
         } else {
             // Reset form when adding a new variant
             setFormData({
@@ -30,8 +38,11 @@ const ProductVariantModal = ({ isOpen, onClose, onSubmit, variant, products, rar
                 rarityId: rarities.length > 0 ? rarities[0].rarityId : '',
                 price: '',
                 stockQuantity: '',
-                imageUrl: ''
+                imageUrl: '',
+                imageFile: null
             });
+
+            setPreviewUrl('');
         }
     }, [variant, products, rarities]);
 
@@ -63,6 +74,37 @@ const ProductVariantModal = ({ isOpen, onClose, onSubmit, variant, products, rar
         }
     };
 
+    // Handle image file upload
+    const handleImageChange = (e) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+
+            setFormData({
+                ...formData,
+                imageFile: file,
+                // Clear the imageUrl when using file upload
+                imageUrl: ''
+            });
+
+            // Create preview URL
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewUrl(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    // Remove selected image
+    const handleRemoveImage = () => {
+        setFormData({
+            ...formData,
+            imageFile: null,
+            imageUrl: ''
+        });
+        setPreviewUrl('');
+    };
+
     // Validate the form before submission
     const validateForm = () => {
         const newErrors = {};
@@ -91,25 +133,44 @@ const ProductVariantModal = ({ isOpen, onClose, onSubmit, variant, products, rar
         return Object.keys(newErrors).length === 0;
     };
 
-    // Handle form submission
     const handleSubmit = (e) => {
         e.preventDefault();
 
         if (validateForm()) {
-            // Convert string values to appropriate types
             const submitData = {
-                ...formData,
-                price: parseInt(formData.price),
-                stockQuantity: parseInt(formData.stockQuantity)
+                productId: formData.productId,
+                rarityId: formData.rarityId,
+                price: formData.price,
+                stockQuantity: formData.stockQuantity
             };
 
-            // If imageUrl is empty, don't include it in the submission
-            if (!submitData.imageUrl) {
-                delete submitData.imageUrl;
+            // Only include imageFile if there is one
+            if (formData.imageFile) {
+                submitData.imageFile = formData.imageFile;
+            }
+
+            // If there's an image URL but no new file
+            if (formData.imageUrl && !formData.imageFile) {
+                submitData.imageUrl = formData.imageUrl;
             }
 
             onSubmit(submitData);
         }
+    };
+
+    // Handle URL image input change
+    const handleImageUrlChange = (e) => {
+        const imageUrl = e.target.value;
+
+        setFormData({
+            ...formData,
+            imageUrl: imageUrl,
+            // Clear the file when using URL
+            imageFile: null
+        });
+
+        // Update preview with new URL
+        setPreviewUrl(imageUrl);
     };
 
     if (!isOpen) return null;
@@ -231,32 +292,127 @@ const ProductVariantModal = ({ isOpen, onClose, onSubmit, variant, products, rar
                             )}
                         </div>
 
-                        {/* Image URL (optional) */}
+                        {/* Image upload and URL section */}
                         <div>
-                            <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1">
-                                Image URL (Optional)
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Product Image (Optional)
                             </label>
-                            <input
-                                type="text"
-                                id="imageUrl"
-                                name="imageUrl"
-                                value={formData.imageUrl}
-                                onChange={handleInputChange}
-                                className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Enter image URL"
-                            />
-                            {formData.imageUrl && (
-                                <div className="mt-2">
-                                    <img
-                                        src={formData.imageUrl}
-                                        alt="Variant preview"
-                                        className="h-24 w-auto object-contain border rounded"
-                                        onError={(e) => {
-                                            e.target.onerror = null;
-                                            e.target.src = 'https://via.placeholder.com/150?text=Invalid+URL';
-                                        }}
-                                    />
+
+                            {/* Tabs for Upload/URL */}
+                            <div className="flex border-b mb-4">
+                                <button
+                                    type="button"
+                                    className={`py-2 px-4 border-b-2 ${!formData.imageUrl || formData.imageFile ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'}`}
+                                    onClick={() => setFormData({ ...formData, imageUrl: '', imageFile: null })}
+                                >
+                                    Upload File
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`py-2 px-4 border-b-2 ${formData.imageUrl && !formData.imageFile ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'}`}
+                                    onClick={() => setFormData({ ...formData, imageFile: null })}
+                                >
+                                    Image URL
+                                </button>
+                            </div>
+
+                            {/* File upload section */}
+                            {!formData.imageUrl && (
+                                <div className="border-2 border-dashed border-gray-300 rounded-md p-4 mb-3">
+                                    <div className="flex flex-col items-center">
+                                        <input
+                                            type="file"
+                                            id="imageFile"
+                                            name="imageFile"
+                                            accept="image/*"
+                                            onChange={handleImageChange}
+                                            className="hidden"
+                                        />
+
+                                        {previewUrl && !formData.imageUrl ? (
+                                            <div className="relative mb-3">
+                                                <img
+                                                    src={previewUrl}
+                                                    alt="Preview"
+                                                    className="h-40 w-auto object-contain mb-2"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={handleRemoveImage}
+                                                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                                                    title="Remove image"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                                <p className="mt-1 text-sm text-gray-500">
+                                                    Click to upload an image
+                                                </p>
+                                            </>
+                                        )}
+
+                                        <button
+                                            type="button"
+                                            onClick={() => document.getElementById('imageFile').click()}
+                                            className="mt-2 px-3 py-1.5 bg-gray-100 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-200"
+                                        >
+                                            {formData.imageFile ? "Change Image" : "Select Image"}
+                                        </button>
+                                    </div>
                                 </div>
+                            )}
+
+                            {/* Image URL input */}
+                            {!formData.imageFile && (
+                                <div>
+                                    <input
+                                        type="text"
+                                        id="imageUrl"
+                                        name="imageUrl"
+                                        value={formData.imageUrl}
+                                        onChange={handleImageUrlChange}
+                                        className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="Enter image URL"
+                                    />
+                                    {formData.imageUrl && (
+                                        <div className="mt-2 relative">
+                                            <img
+                                                src={formData.imageUrl}
+                                                alt="Variant preview"
+                                                className="h-40 w-auto object-contain border rounded"
+                                                onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = 'https://via.placeholder.com/150?text=Invalid+URL';
+                                                }}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={handleRemoveImage}
+                                                className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 mt-1 mr-1"
+                                                title="Remove image"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {(formData.imageFile || formData.imageUrl) && (
+                                <p className="mt-1 text-xs text-gray-500">
+                                    {formData.imageFile
+                                        ? `Selected file: ${formData.imageFile.name}`
+                                        : "Using image URL"}
+                                </p>
                             )}
                         </div>
 

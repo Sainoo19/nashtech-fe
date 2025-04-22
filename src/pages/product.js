@@ -160,6 +160,9 @@ const Product = () => {
     };
 
     // Handle search with debounce
+    // Modify your useEffect and search handler
+
+    // Handle search with debounce
     const handleSearch = (e) => {
         const value = e.target.value;
         setSearchTerm(value);
@@ -171,11 +174,21 @@ const Product = () => {
 
         const timeoutId = setTimeout(() => {
             setCurrentPage(1); // Reset to first page on search
-            fetchProducts();
-        }, 500);
+        }, 500); // After 500ms, this will trigger the useEffect through currentPage change
 
         setFilterTimeout(timeoutId);
     };
+
+    // Cleanup the timeout when component unmounts
+    useEffect(() => {
+        return () => {
+            if (filterTimeout) {
+                clearTimeout(filterTimeout);
+            }
+        };
+    }, [filterTimeout]);
+
+
 
     // Handle sort change
     const handleSortChange = (e) => {
@@ -313,7 +326,7 @@ const Product = () => {
     // Load products on component mount and when filters or pagination changes
     useEffect(() => {
         fetchProducts();
-    }, [currentPage, pageSize, sortBy, ascending, categoryFilter]);
+    }, [currentPage, pageSize, sortBy, ascending, categoryFilter, searchTerm]);
 
     // Load categories on component mount
     useEffect(() => {

@@ -95,12 +95,14 @@ const ProductVariant = () => {
         try {
             const response = await axios.get('/api/Rarity');
             if (response.data.success) {
-                setRarities(response.data.data);
+                setRarities(response.data.data.items);
             }
         } catch (error) {
             console.error('Failed to fetch rarities:', error);
         }
     };
+
+    // Modify your useEffect and search handler
 
     // Handle search with debounce
     const handleSearch = (e) => {
@@ -114,11 +116,24 @@ const ProductVariant = () => {
 
         const timeoutId = setTimeout(() => {
             setCurrentPage(1); // Reset to first page on search
-            fetchProductVariants();
-        }, 500);
+        }, 500); // After 500ms, this will trigger the useEffect through currentPage change
 
         setFilterTimeout(timeoutId);
     };
+
+    // Cleanup the timeout when component unmounts
+    useEffect(() => {
+        return () => {
+            if (filterTimeout) {
+                clearTimeout(filterTimeout);
+            }
+        };
+    }, [filterTimeout]);
+
+    // Add searchTerm to the dependency array to ensure fetchProductVariants runs when it changes
+    useEffect(() => {
+        fetchProductVariants();
+    }, [currentPage, pageSize, sortBy, ascending, productFilter, rarityFilter, searchTerm]);
 
     // Handle sort change
     const handleSortChange = (e) => {
@@ -190,12 +205,31 @@ const ProductVariant = () => {
     // Handle form submission (create/update)
     const handleFormSubmit = async (formData) => {
         try {
+            // Create a FormData object for multipart/form-data submission
+            const formDataObj = new FormData();
+
+            // Add each property to the FormData object
+            Object.keys(formData).forEach(key => {
+                // Only add properties that have values
+                if (formData[key] !== null && formData[key] !== undefined) {
+                    formDataObj.append(key, formData[key]);
+                }
+            });
+
             if (editingVariant) {
                 // Update existing variant
-                await axios.put(`/api/ProductVariant/${editingVariant.variantId}`, formData);
+                await axios.put(`/api/ProductVariant/${editingVariant.variantId}`, formDataObj, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    }
+                });
             } else {
                 // Create new variant
-                await axios.post('/api/ProductVariant', formData);
+                await axios.post('/api/ProductVariant', formDataObj, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    }
+                });
             }
 
             setIsModalOpen(false);
