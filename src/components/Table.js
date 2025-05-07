@@ -25,8 +25,8 @@ const Table = ({ columns, data, onEdit, onDelete, idField = 'id' }) => {
                         <tr
                             key={item[idField] || index}
                             className={`
-                                ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
-                                hover:bg-gray-100
+                                ${index % 2 === 0 ? 'bg-white' : 'bg-neutral'}
+                                hover:bg-neutral-dark
                             `}
                         >
                             {columns.map((column) => (
@@ -42,7 +42,7 @@ const Table = ({ columns, data, onEdit, onDelete, idField = 'id' }) => {
                                     {/* Edit button */}
                                     <button
                                         onClick={() => onEdit(item[idField])}
-                                        className="flex items-center px-3 py-1.5 bg-secondary text-black text-sm font-medium rounded-md hover:bg-yellow-400 transition-colors duration-200"
+                                        className="flex items-center px-3 py-1.5 bg-secondary text-white text-sm font-medium rounded-md hover:bg-secondary-dark transition-colors duration-200"
                                     >
                                         <Edit size={16} className="mr-1" />
                                         Edit
@@ -51,7 +51,7 @@ const Table = ({ columns, data, onEdit, onDelete, idField = 'id' }) => {
                                     {/* Delete button */}
                                     <button
                                         onClick={() => onDelete(item[idField])}
-                                        className="flex items-center px-3 py-1.5 bg-red-500 text-white text-sm font-medium rounded-md hover:bg-red-600 transition-colors duration-200"
+                                        className="flex items-center px-3 py-1.5 bg-danger text-white text-sm font-medium rounded-md hover:bg-danger-dark transition-colors duration-200"
                                     >
                                         <Trash2 size={16} className="mr-1" />
                                         Delete

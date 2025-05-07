@@ -113,13 +113,19 @@ const ProductModal = ({ isOpen, onClose, onSubmit, product, categories }) => {
             if (formData.imageFile) {
                 submitData.append('ImageFile', formData.imageFile);
             }
+            // If no new file is selected but we have a preview URL (from existing product)
+            // and we're in edit mode, send the existing image URL
+            else if (previewUrl && product) {
+                submitData.append('ImageUrl', previewUrl);
+            }
 
             // Log the form data being sent (for debugging)
             console.log('Submitting form with data:', {
                 name: formData.name,
                 categoryId: formData.categoryId,
                 description: formData.description,
-                hasImageFile: !!formData.imageFile
+                hasImageFile: !!formData.imageFile,
+                imageUrl: formData.imageFile ? null : previewUrl // Log the URL we're sending when no file
             });
 
             onSubmit(submitData);
@@ -285,13 +291,13 @@ const ProductModal = ({ isOpen, onClose, onSubmit, product, categories }) => {
                         <button
                             type="button"
                             onClick={onClose}
-                            className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-md transition-colors"
+                            className="bg-neutral hover:bg-neutral-dark text-gray-800 font-medium py-2 px-4 rounded-md transition-colors"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+                            className="bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded-md transition-colors"
                         >
                             {product ? "Update Product" : "Create Product"}
                         </button>

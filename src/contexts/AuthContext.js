@@ -1,4 +1,3 @@
-// src/contexts/AuthContext.js
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from '../api/axios';
 
@@ -45,15 +44,13 @@ export const AuthProvider = ({ children }) => {
             }
         } catch (error) {
             console.error('Authentication check failed:', error);
-            // Clear token if authentication failed
-            localStorage.removeItem('auth_token');
-            setCurrentUser(null);
+            // Don't clear token here, as we'll handle token refresh in axios interceptor
         } finally {
             setLoading(false);
         }
     };
 
-    // In AuthContext.js
+    // Login function
     const login = async (email, password) => {
         try {
             // Create form data manually
@@ -70,16 +67,12 @@ export const AuthProvider = ({ children }) => {
                 },
             });
 
-            // Store token in memory or localStorage
-            const token = response.data.access_token;
-            localStorage.setItem('auth_token', token);
+            // Store both tokens in localStorage
+            localStorage.setItem('auth_token', response.data.access_token);
+            localStorage.setItem('refresh_token', response.data.refresh_token);
 
             // Use token to fetch user roles
-            const rolesResponse = await axios.get('/api/Auth/roles', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
+            const rolesResponse = await axios.get('/api/Auth/roles');
 
             // Check if user has admin role
             const userData = rolesResponse.data.data;
@@ -101,14 +94,19 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-
     // Logout function
     const logout = async () => {
         try {
             await axios.post('/api/Auth/logout');
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('refresh_token');
             setCurrentUser(null);
         } catch (error) {
             console.error('Logout error:', error);
+            // Even if logout API fails, clear tokens and user state
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('refresh_token');
+            setCurrentUser(null);
         }
     };
 

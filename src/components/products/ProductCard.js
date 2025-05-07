@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MoreVertical, Star } from 'react-feather';
+import { MoreVertical, Edit, Trash2 } from 'react-feather';
 
 const ProductCard = ({ product, onEdit, onDelete }) => {
     const [showActions, setShowActions] = useState(false);
@@ -14,11 +14,11 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
     };
 
     return (
-        <div className="bg-white rounded-lg shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-200 border border-gray-200">
+        <div className="bg-white rounded-lg shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-200 border border-neutral-darker">
             <div className="flex">
                 {/* Image container with fixed dimensions */}
                 <div className="relative w-1/3 min-w-[120px]">
-                    <div className="aspect-square w-full h-full p-4 flex items-center justify-center bg-gray-50">
+                    <div className="aspect-square w-full h-full p-4 flex items-center justify-center bg-neutral">
                         {product.imageUrl ? (
                             <img
                                 src={product.imageUrl}
@@ -41,7 +41,7 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
                     <div className="absolute top-3 right-3">
                         <button
                             onClick={toggleActions}
-                            className="p-1 rounded-full hover:bg-gray-100"
+                            className="p-1 rounded-full hover:bg-neutral-dark"
                         >
                             <MoreVertical size={18} className="text-gray-500" />
                         </button>
@@ -62,8 +62,9 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
                                                 closeActions();
                                                 onEdit();
                                             }}
-                                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                            className="w-full flex items-center text-left px-4 py-2 text-sm text-gray-700 hover:bg-neutral"
                                         >
+                                            <Edit size={16} className="mr-2 text-secondary" />
                                             Edit
                                         </button>
                                         <button
@@ -72,8 +73,9 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
                                                 closeActions();
                                                 onDelete();
                                             }}
-                                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                                            className="w-full flex items-center text-left px-4 py-2 text-sm text-danger hover:bg-neutral"
                                         >
+                                            <Trash2 size={16} className="mr-2" />
                                             Delete
                                         </button>
                                     </div>
@@ -91,15 +93,15 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
 
                         {/* Category badge */}
                         <div className="mb-2">
-                            <span className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded">
+                            <span className="bg-primary-light/20 text-primary-dark text-xs px-2 py-0.5 rounded">
                                 {product.categoryName}
                             </span>
                         </div>
 
-                        {/* Price Range - New addition */}
+                        {/* Price Range */}
                         {product.priceRange && (
                             <div className="mb-2">
-                                <span className="font-semibold text-sm text-blue-600">
+                                <span className="font-semibold text-sm text-secondary-dark">
                                     {product.priceRange}
                                 </span>
                             </div>
